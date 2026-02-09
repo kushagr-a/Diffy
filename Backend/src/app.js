@@ -2,16 +2,19 @@ import express from "express"
 import morm from "morgan"
 import cookieParser from "cookie-parser"
 import cors from "cors"
+import dotenv from "dotenv"
 
 import apiRoute from "./apiRoutes.js"
-
+import connectDB from "./config/db.js"
 const app = express()
+dotenv.config();
 
 // Middleware
 app.use(express.json({ limit: "10kb" }))
 app.use(express.urlencoded({ extended: true, limit: "10kb" }))
 app.use(morm("dev"))
 app.use(cookieParser())
+app.use(connectDB())
 
 // cors configuration
 app.use(
