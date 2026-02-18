@@ -2,7 +2,7 @@ import express from "express"
 import morm from "morgan"
 import cookieParser from "cookie-parser"
 import cors from "cors"
-import multer from "multer"
+// import multer from "multer"
 
 import apiRoute from "./apiRoutes.js"
 

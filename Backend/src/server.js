@@ -2,7 +2,7 @@ import app from "./app.js";
 import { configs } from "./utils/config/config.js";
 import connectDB from "./db/db.js"
 
-const PORT = configs.PORT || 3000;
+const PORT = configs.PORT || 3030;
 
 const staretServer = () => {
     try {
