@@ -1,4 +1,4 @@
-import crypto from "crypto"
+import crypto from "node:crypto"
 import { configs } from "../utils/config/config.js"
 
 // Verify webhook signature
@@ -30,7 +30,8 @@ export const githubWebhook = async (req, res) => {
                 // 2. Get files changed
                 // 3. Get diff
                 // 4. Send to AI
-                // 5. Post comment
+                // 5. ai review post comment
+                // 6. ready to merge -> agar AI ko lga ki sab correct hai to merge rok dega.
 
 
             }

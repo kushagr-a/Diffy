@@ -81,7 +81,7 @@ export const callBackUrl = async (req, res) => {
 
         const jwtToken = jwt.sign(
             { userId: user._id },
-            process.env.JWT_SECRET,
+            configs.JWT_SECRET,
             { expiresIn: "1d" }
         );
 
