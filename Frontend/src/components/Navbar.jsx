@@ -1,47 +1,66 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Terminal, Shield, Menu } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { Terminal, Github } from 'lucide-react';
 
 const Navbar = () => {
+    const [stars, setStars] = useState(null);
+    const location = useLocation();
+
+    useEffect(() => {
+        fetch('https://api.github.com/repos/kushagr-a/GitHub_Pr_Reviewer')
+            .then(res => res.json())
+            .then(data => {
+                if (data.stargazers_count !== undefined) {
+                    setStars(data.stargazers_count);
+                }
+            })
+            .catch(err => console.error("Failed to fetch stars", err));
+    }, []);
+
+    const scrollToFeatures = (e) => {
+        if (location.pathname === '/') {
+            e.preventDefault();
+            const el = document.getElementById('features');
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
+
     return (
-        <nav className="glass" style={{
-            position: 'fixed',
-            top: '1rem',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: '90%',
-            maxWidth: '1200px',
-            height: '70px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '0 2rem',
-            zIndex: 1000,
-            borderRadius: '20px'
-        }}>
-            <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', color: 'inherit' }}>
-                <div style={{
-                    background: 'var(--grad-main)',
-                    padding: '8px',
-                    borderRadius: '10px',
-                    display: 'flex'
-                }}>
-                    <Terminal size={24} color="white" />
+        <nav className="fixed top-0 left-0 w-full z-50 border-b border-white/5 bg-bg-base/80 backdrop-blur-md">
+            <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+                <Link to="/" className="flex items-center gap-3 group">
+                    <div className="bg-brand p-1.5 rounded group-hover:rotate-12 transition-all shadow-lg shadow-brand/20">
+                        <Terminal className="w-5 h-5 text-white" />
+                    </div>
+                    <span className="text-xl font-black tracking-tighter">DIFFY</span>
+                </Link>
+
+                <div className="hidden md:flex items-center gap-8">
+                    <Link to="/" className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest hover:text-white transition-colors">Home</Link>
+                    <a href="/#features" onClick={scrollToFeatures} className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest hover:text-white transition-colors cursor-pointer">Features</a>
+                    <a href="https://github.com/kushagr-a/GitHub_Pr_Reviewer/blob/main/README.md" target="_blank" rel="noopener noreferrer" className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest hover:text-white transition-colors">Docs</a>
+                    <Link to="/dashboard" className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest hover:text-white transition-colors">Dashboard</Link>
                 </div>
-                <span style={{ fontSize: '1.5rem', fontWeight: '800', letterSpacing: '-1px' }}>
-                    DIFFY<span style={{ color: 'var(--accent-primary)' }}>.</span>
-                </span>
-            </Link>
 
-            <div className="nav-links" style={{ display: 'flex', gap: '2rem', fontWeight: '500', color: 'var(--text-muted)' }}>
-                <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>Product</Link>
-                <Link to="/dashboard" style={{ textDecoration: 'none', color: 'inherit' }}>Dashboard</Link>
-                <a href="#" style={{ textDecoration: 'none', color: 'inherit' }}>Docs</a>
+                <div className="flex items-center gap-4">
+                    <a
+                        href="https://github.com/kushagr-a/GitHub_Pr_Reviewer"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-white hover:bg-zinc-200 text-black h-8 px-4 py-0 rounded font-bold text-[10px] uppercase tracking-widest flex items-center transition-all shadow-sm"
+                    >
+                        <div className="flex items-center gap-2 pr-3">
+                            <Github size={14} />
+                            <span>Star</span>
+                        </div>
+                        {stars !== null && (
+                            <div className="flex items-center gap-2 pl-3 py-1 border-l border-black/20 font-mono text-xs">
+                                {stars}
+                            </div>
+                        )}
+                    </a>
+                </div>
             </div>
-
-            <button className="btn-primary" style={{ padding: '8px 20px', fontSize: '0.9rem' }} onClick={() => window.location.href = 'http://localhost:3030/api/auth/github'}>
-                Get Started
-            </button>
         </nav>
     );
 };

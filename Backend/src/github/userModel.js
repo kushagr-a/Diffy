@@ -14,6 +14,10 @@ const userSchema = new mongoose.Schema(
         avatar: String,
         email: String,
         accessToken: String,
+        projects: {
+            type: [String],
+            default: []
+        }
     },
     { timestamps: true }
 );
