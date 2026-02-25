@@ -12,7 +12,7 @@ const GITHUB_CALLBACK_URL = configs.GITHUB_CALLBACK_URL
 
 // Must match exactly what's set in GitHub OAuth App settings
 export const reditectUrl = async (req, res) => {
-    const url = `https://github.com/login/oauth/authorize?client_id=${configs.GITHUB_CLIENT_ID}&redirect_uri=${encodeURIComponent(GITHUB_CALLBACK_URL)}`;
+    const url = `https://github.com/login/oauth/authorize?client_id=${configs.GITHUB_CLIENT_ID}&redirect_uri=${encodeURIComponent(GITHUB_CALLBACK_URL)}&scope=repo`;
     res.redirect(url);
 }
 
@@ -23,6 +23,7 @@ export const callBackUrl = async (req, res) => {
         if (!code) {
             return res.status(400).json({ error: "Authorization code missing" });
         }
+        console.log(">>> OAuth Callback triggered with code:", code ? "YES" : "NO");
 
         const tokenRes = await axios.post(
             "https://github.com/login/oauth/access_token",
@@ -41,44 +42,40 @@ export const callBackUrl = async (req, res) => {
         );
 
         if (tokenRes.data.error) {
-            console.error("GitHub token error:", tokenRes.data);
+            console.error(">>> GitHub token error:", tokenRes.data);
             return res.status(401).json({ error: tokenRes.data.error_description || tokenRes.data.error });
         }
 
         const accessToken = tokenRes.data.access_token;
+        console.log(">>> Access Token received:", accessToken ? "YES" : "NO");
 
         const userRes = await axios.get("https://api.github.com/user", {
             headers: { authorization: `Bearer ${accessToken}` }
         });
 
         const githubUser = userRes.data;
+        console.log(">>> GitHub User identified:", githubUser.login);
 
-        // let user = await User.findOne({ githubId: githubUser.id });
-
-        // if (!user) {
-        //     user = await User.create({
-        //         githubId: githubUser.id,
-        //         username: githubUser.login,
-        //         avatar: githubUser.avatar_url,
-        //         email: githubUser.email
-        //     });
-        // } 
         let user = await User.findOne({ githubId: String(githubUser.id) });
 
         if (!user) {
-            console.log("Creating new user...");
+            console.log(">>> Creating new user in DB...");
             user = await User.create({
                 githubId: String(githubUser.id),
                 username: githubUser.login,
                 avatar: githubUser.avatar_url,
-                email: githubUser.email
+                email: githubUser.email,
+                accessToken: accessToken
             });
-            console.log("User created:", user);
+            console.log(">>> User created successfully.");
         } else {
-            console.log("User already exists");
+            console.log(">>> User exists, updating accessToken...");
+            user.accessToken = accessToken;
+            await user.save();
+            console.log(">>> Token updated successfully.");
         }
 
-
+        console.log(">>> Redirecting to frontend:", configs.FRONTEND_URL);
         const jwtToken = jwt.sign(
             { userId: user._id },
             configs.JWT_SECRET,
@@ -91,12 +88,10 @@ export const callBackUrl = async (req, res) => {
             secure: configs.NODE_ENV === "production",
             sameSite: "lax",
             maxAge: 24 * 60 * 60 * 1000
-        })
+        });
 
-        // optional 
-        // res.redirect("https://github.com/");
-        res.redirect(configs.FRONTEND_URL); // from here redirect to our dashboard
-
+        // Redirect to frontend dashboard
+        res.redirect(configs.FRONTEND_URL);
 
     } catch (err) {
         console.error("GitHub OAuth error:", err.response?.data || err.message);

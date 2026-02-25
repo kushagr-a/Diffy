@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema(
         },
         avatar: String,
         email: String,
+        accessToken: String,
     },
     { timestamps: true }
 );
