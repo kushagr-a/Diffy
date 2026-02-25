@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
@@ -80,6 +81,35 @@ const Dashboard = () => {
         }
     }, [selectedRepo]);
 
+    // Handle Browser Popstate UX Additions
+    useEffect(() => {
+        if (selectedRepo) window.history.pushState({ view: 'repo' }, '');
+    }, [selectedRepo]);
+
+    useEffect(() => {
+        if (showAddModal) window.history.pushState({ view: 'modal' }, '');
+    }, [showAddModal]);
+
+    useEffect(() => {
+        if (selectedReport) window.history.pushState({ view: 'report' }, '');
+    }, [selectedReport]);
+
+    useEffect(() => {
+        const handlePopState = (e) => {
+            if (selectedReport) {
+                setSelectedReport(null);
+            } else if (showAddModal) {
+                setShowAddModal(false);
+            } else if (selectedRepo) {
+                setSelectedRepo(null);
+            }
+        };
+
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, [selectedReport, showAddModal, selectedRepo]);
+
+
     const handleToggleProject = async (repoFullName) => {
         try {
             await axios.post('http://localhost:3030/api/toggle-project',
@@ -101,11 +131,32 @@ const Dashboard = () => {
     );
 
     if (loading) return (
-        <div className="h-screen bg-surface-base flex items-center justify-center">
-            <div className="flex flex-col items-center gap-6">
-                <div className="w-8 h-8 border-2 border-brand border-t-transparent rounded-full animate-spin" />
-                <p className="text-zinc-500 font-mono text-[10px] tracking-widest uppercase">Booting Diffy Environment</p>
-            </div>
+        <div className="flex h-screen bg-surface-base text-zinc-100 selection:bg-brand/30">
+            <div className="bg-glow" />
+            <aside className="w-64 border-r border-border-subtle bg-surface-card/50 flex flex-col p-8">
+                <div className="flex items-center gap-3 mb-12 opacity-50">
+                    <div className="w-8 h-8 rounded bg-zinc-800 animate-pulse" />
+                    <div className="h-6 w-20 bg-zinc-800 rounded animate-pulse" />
+                </div>
+                <div className="space-y-4 flex-1 opacity-50">
+                    <div className="h-10 w-full bg-zinc-800/50 rounded animate-pulse" />
+                    <div className="h-10 w-full bg-zinc-800/50 rounded animate-pulse" />
+                </div>
+                <div className="h-24 w-full bg-zinc-800/50 rounded animate-pulse mb-6 opacity-50" />
+                <div className="h-11 w-full bg-zinc-800 rounded animate-pulse opacity-50" />
+            </aside>
+            <main className="flex-1 p-10 flex flex-col overflow-hidden">
+                <div className="h-16 w-full border-b border-border-subtle flex items-center justify-between mb-10 opacity-50">
+                    <div className="h-10 w-64 bg-zinc-800/50 rounded animate-pulse" />
+                    <div className="h-10 w-32 bg-zinc-800/50 rounded animate-pulse" />
+                </div>
+                <div className="h-10 w-48 bg-zinc-800/50 rounded animate-pulse mb-8 opacity-50" />
+                <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-6">
+                    <div className="h-48 bg-zinc-900/40 border border-zinc-800/50 rounded-xl animate-pulse" />
+                    <div className="h-48 bg-zinc-900/40 border border-zinc-800/50 rounded-xl animate-pulse" />
+                    <div className="h-48 bg-zinc-900/40 border border-zinc-800/50 rounded-xl animate-pulse" />
+                </div>
+            </main>
         </div>
     );
 
@@ -288,56 +339,55 @@ const Dashboard = () => {
 
             {/* Sidebar */}
             <aside className="w-64 border-r border-border-subtle bg-surface-card/50 flex flex-col">
-                <div className="p-8 pb-12 flex items-center gap-3">
-                    <div className="bg-white text-black p-1.5 rounded transition-transform hover:rotate-12">
+                <Link to="/" className="p-8 pb-12 flex items-center gap-3 group cursor-pointer inline-flex">
+                    <div className="bg-white text-black p-1.5 rounded transition-transform group-hover:rotate-12">
                         <Terminal size={18} />
                     </div>
-                    <span className="font-bold tracking-tighter text-lg">DIFFY</span>
-                </div>
+                    <span className="font-bold tracking-tighter text-lg text-white group-hover:text-zinc-300 transition-colors">DIFFY</span>
+                </Link>
 
                 <nav className="flex-1 px-4 space-y-1">
                     <NavItem icon={<LayoutDashboard size={16} />} label="Overview" active />
-                    <NavItem icon={<Layers size={16} />} label="Repositories" />
-                    <a
-                        href="https://github.com/kushagr-a/GitHub_Pr_Reviewer"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="nav-sidebar-item"
-                    >
-                        <Github size={16} />
-                        <span>Codebase</span>
-                    </a>
-                </nav>
-
-                <div className="p-4 mt-auto border-t border-border-subtle/50">
-                    <button
-                        onClick={handleLogout}
-                        className="w-full flex items-center gap-3 px-3 py-2 rounded text-sm font-medium text-zinc-500 hover:text-red-400 hover:bg-red-500/5 transition-all"
-                    >
-                        <Settings size={16} className="rotate-90" />
-                        <span>Sign Out</span>
-                    </button>
-                </div>
-
-                <div className="p-6">
-                    <div className="bg-zinc-900/50 rounded-lg p-5 border border-zinc-800 mb-6">
-                        <div className="flex justify-between items-end mb-4">
-                            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Active Nodes</span>
-                            <span className="font-mono text-lg leading-none">{data.stats.activeProjects}</span>
-                        </div>
-                        <div className="flex justify-between items-end">
-                            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Logic Scans</span>
-                            <span className="font-mono text-lg text-brand leading-none">{data.stats.totalScans}</span>
-                        </div>
-                    </div>
-
                     <button
                         onClick={() => setShowAddModal(true)}
-                        className="w-full h-11 bg-zinc-100 hover:bg-white text-zinc-950 rounded font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-sm active:scale-[0.98]"
+                        className="w-full text-left nav-sidebar-item hover:bg-zinc-900 transition-colors"
                     >
-                        <Plus size={14} />
-                        Register Node
+                        <Layers size={16} />
+                        <span>Repositories</span>
                     </button>
+                </nav>
+
+                <div className="mt-auto">
+                    <div className="p-6 pb-4">
+                        <div className="bg-zinc-900/50 rounded-lg p-5 border border-zinc-800 mb-4">
+                            <div className="flex justify-between items-end mb-4">
+                                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Active Nodes</span>
+                                <span className="font-mono text-lg leading-none">{data.stats.activeProjects}</span>
+                            </div>
+                            <div className="flex justify-between items-end">
+                                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Logic Scans</span>
+                                <span className="font-mono text-lg text-brand leading-none">{data.stats.totalScans}</span>
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={() => setShowAddModal(true)}
+                            className="w-full h-11 bg-zinc-100 hover:bg-white text-zinc-950 rounded font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-sm active:scale-[0.98]"
+                        >
+                            <Plus size={14} />
+                            Register Node
+                        </button>
+                    </div>
+
+                    <div className="p-4 border-t border-border-subtle/50">
+                        <button
+                            onClick={handleLogout}
+                            className="w-full flex items-center justify-center gap-3 px-3 py-2 rounded text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-red-400 hover:bg-red-500/10 transition-all"
+                        >
+                            <Settings size={12} className="rotate-90" />
+                            <span>Sign Out</span>
+                        </button>
+                    </div>
                 </div>
             </aside>
 
@@ -392,17 +442,34 @@ const Dashboard = () => {
                                 onClick={() => setSelectedRepo(repo)}
                             />
                         )) : (
-                            <div className="col-span-full border border-zinc-800 border-dashed rounded-xl py-32 flex flex-col items-center justify-center text-zinc-600">
-                                <Bot className="mb-6 opacity-20" size={64} />
-                                <div className="text-center">
-                                    <p className="font-mono text-xs mb-6 uppercase tracking-[0.2em] italic">
-                                        {searchTerm ? `No nodes matching "${searchTerm}"` : 'No logic streams configured yet.'}
+                            <div className="col-span-full border border-zinc-800/60 border-dashed rounded-2xl bg-zinc-900/20 backdrop-blur-sm py-32 flex flex-col items-center justify-center text-zinc-500 relative overflow-hidden group">
+                                <div className="absolute inset-0 bg-gradient-to-br from-brand/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                                <div className="w-16 h-16 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-6 shadow-2xl relative">
+                                    <Bot className="text-zinc-400 group-hover:text-brand transition-colors duration-500" size={28} />
+                                    <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-brand rounded-full border-2 border-zinc-900 animate-pulse" />
+                                </div>
+                                <div className="text-center relative z-10">
+                                    <h3 className="text-lg font-bold text-white mb-2">
+                                        {searchTerm ? 'No Nodes Found' : 'Awaken Your Logic Engine'}
+                                    </h3>
+                                    <p className="text-sm font-medium text-zinc-500 max-w-sm mx-auto mb-8 leading-relaxed">
+                                        {searchTerm
+                                            ? `No active nodes match "${searchTerm}". Adjust your filters to find what you're looking for.`
+                                            : 'Connect your GitHub repositories to authorize Diffy to begin scanning pull requests for logical regressions.'}
                                     </p>
                                     <button
                                         onClick={() => searchTerm ? setSearchTerm('') : setShowAddModal(true)}
-                                        className="h-10 px-8 bg-zinc-900 border border-zinc-700 hover:bg-zinc-800 text-white rounded font-bold text-[10px] uppercase tracking-widest transition-all"
+                                        className="h-11 px-8 bg-white hover:bg-zinc-200 text-black rounded font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg hover:shadow-white/10 active:scale-[0.98] flex items-center justify-center gap-2 mx-auto"
                                     >
-                                        {searchTerm ? 'Reset Filter' : 'Register New Node'}
+                                        {searchTerm ? (
+                                            <>
+                                                <Search size={14} /> Reset Filter
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Plus size={14} /> Connect First Repository
+                                            </>
+                                        )}
                                     </button>
                                 </div>
                             </div>
