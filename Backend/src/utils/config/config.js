@@ -12,6 +12,7 @@ const _config = {
     JWT_SECRET: process.env.JWT_SECRET,
     FRONTEND_URL: process.env.FRONTEND_URL || "http://localhost:5173",
     GITHUB_WEBHOOK_SECRET: process.env.GITHUB_WEBHOOK_SECRET,
+    GEMINI_API_KEY: process.env.GEMINI_API_KEY,
 }
 
 

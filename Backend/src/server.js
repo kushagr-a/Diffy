@@ -1,13 +1,16 @@
 import app from "./app.js";
 import { configs } from "./utils/config/config.js";
 import connectDB from "./db/db.js"
+import mongoose from "mongoose";
 
 const PORT = configs.PORT || 3030;
 
 const staretServer = () => {
     try {
         const server = app.listen(PORT, () => {
-            console.log(`Your server is running on http://localhost:${PORT}`);
+            console.log("=========================================");
+            console.log(` SERVER LIVE: http://localhost:${PORT}`);
+            console.log("=========================================");
 
             // connect to the database here
             connectDB()
@@ -15,7 +18,7 @@ const staretServer = () => {
             // Graceful shutdown
             const shutdown = async () => {
                 console.log("Shutting down...");
-                await db.$disconnect();
+                await mongoose.disconnect();
                 server.close(() => {
                     console.log("Server closed.");
                     process.exit(0);

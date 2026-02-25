@@ -1,22 +1,17 @@
-
 import axios from 'axios';
 import jwt from 'jsonwebtoken';
 import { User } from './userModel.js';
-
 import { configs } from "../utils/config/config.js"
-
-
-// const GITHUB_CALLBACK_URL = process.env.GITHUB_CALLBACK_URL || "http://localhost:3000/api/auth/github/callback";
 
 const GITHUB_CALLBACK_URL = configs.GITHUB_CALLBACK_URL
 
-// Must match exactly what's set in GitHub OAuth App settings
+// Redirect to GitHub for OAuth
 export const reditectUrl = async (req, res) => {
-    const url = `https://github.com/login/oauth/authorize?client_id=${configs.GITHUB_CLIENT_ID}&redirect_uri=${encodeURIComponent(GITHUB_CALLBACK_URL)}`;
+    const url = `https://github.com/login/oauth/authorize?client_id=${configs.GITHUB_CLIENT_ID}&redirect_uri=${encodeURIComponent(GITHUB_CALLBACK_URL)}&scope=repo`;
     res.redirect(url);
 }
 
-// The page after the authentication is approved or rejected
+// Handle GitHub Callback
 export const callBackUrl = async (req, res) => {
     try {
         const code = req.query.code;
@@ -41,7 +36,6 @@ export const callBackUrl = async (req, res) => {
         );
 
         if (tokenRes.data.error) {
-            console.error("GitHub token error:", tokenRes.data);
             return res.status(401).json({ error: tokenRes.data.error_description || tokenRes.data.error });
         }
 
@@ -53,31 +47,20 @@ export const callBackUrl = async (req, res) => {
 
         const githubUser = userRes.data;
 
-        // let user = await User.findOne({ githubId: githubUser.id });
-
-        // if (!user) {
-        //     user = await User.create({
-        //         githubId: githubUser.id,
-        //         username: githubUser.login,
-        //         avatar: githubUser.avatar_url,
-        //         email: githubUser.email
-        //     });
-        // } 
         let user = await User.findOne({ githubId: String(githubUser.id) });
 
         if (!user) {
-            console.log("Creating new user...");
             user = await User.create({
                 githubId: String(githubUser.id),
                 username: githubUser.login,
                 avatar: githubUser.avatar_url,
-                email: githubUser.email
+                email: githubUser.email,
+                accessToken: accessToken
             });
-            console.log("User created:", user);
         } else {
-            console.log("User already exists");
+            user.accessToken = accessToken;
+            await user.save();
         }
-
 
         const jwtToken = jwt.sign(
             { userId: user._id },
@@ -85,23 +68,27 @@ export const callBackUrl = async (req, res) => {
             { expiresIn: "1d" }
         );
 
-        // set in cookie
         res.cookie("token", jwtToken, {
             httpOnly: true,
             secure: configs.NODE_ENV === "production",
             sameSite: "lax",
-            maxAge: 24 * 60 * 60 * 1000
-        })
-
-        // optional 
-        // res.redirect("https://github.com/");
-        res.redirect(configs.FRONTEND_URL); // from here redirect to our dashboard
-
-
-    } catch (err) {
-        console.error("GitHub OAuth error:", err.response?.data || err.message);
-        res.status(err.response?.status || 500).json({
-            error: err.response?.data?.error_description || err.message
+            maxAge: 24 * 60 * 60 * 1000,
+            path: "/"
         });
+
+        res.redirect(`${configs.FRONTEND_URL}/dashboard`);
+    } catch (err) {
+        console.error("GitHub OAuth error:", err.message);
+        res.status(500).json({ error: "Authentication failed" });
     }
 }
+
+// Logout UI Action
+export const logout = (req, res) => {
+    res.clearCookie("token", {
+        path: "/",
+        httpOnly: true,
+        sameSite: "lax"
+    });
+    res.redirect(configs.FRONTEND_URL || "http://localhost:5173");
+};
