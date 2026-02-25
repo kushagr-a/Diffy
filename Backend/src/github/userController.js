@@ -81,7 +81,7 @@ export const callBackUrl = async (req, res) => {
 
         const jwtToken = jwt.sign(
             { userId: user._id },
-            process.env.JWT_SECRET,
+            configs.JWT_SECRET,
             { expiresIn: "1d" }
         );
 
@@ -94,7 +94,8 @@ export const callBackUrl = async (req, res) => {
         })
 
         // optional 
-        res.redirect("https://github.com/");
+        // res.redirect("https://github.com/");
+        res.redirect(configs.FRONTEND_URL); // from here redirect to our dashboard
 
 
     } catch (err) {
