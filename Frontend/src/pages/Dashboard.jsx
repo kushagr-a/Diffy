@@ -394,15 +394,19 @@ const Dashboard = () => {
             {/* Content Area */}
             <main className="flex-1 flex flex-col overflow-hidden">
                 <header className="h-20 border-b border-border-subtle flex items-center justify-between px-10 bg-surface-base/80 backdrop-blur-md z-10 shrink-0">
-                    <div className="flex items-center gap-4 bg-zinc-900/50 border border-zinc-800 rounded-lg px-4 py-2 w-full max-w-md group focus-within:border-brand/40 transition-colors">
-                        <Search size={16} className="text-zinc-600 group-focus-within:text-brand" />
+                    <div className="flex items-center gap-3 bg-zinc-900/50 border border-zinc-800 rounded-lg pl-4 pr-2 py-1.5 w-full max-w-md group focus-within:border-brand/40 focus-within:bg-zinc-900/80 transition-all shadow-inner">
+                        <Search size={14} className="text-zinc-500 group-focus-within:text-brand transition-colors" />
                         <input
                             type="text"
                             placeholder="Filter your intelligence network..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="bg-transparent border-none outline-none text-sm text-zinc-300 w-full placeholder:text-zinc-700 font-mono"
+                            className="bg-transparent border-none outline-none text-sm text-zinc-300 w-full placeholder:text-zinc-600 font-medium"
                         />
+                        <div className="hidden sm:flex items-center gap-1.5 px-2 py-1 rounded bg-zinc-950 border border-zinc-800 text-[10px] font-bold text-zinc-500 uppercase tracking-widest pointer-events-none select-none">
+                            <span className="font-sans text-xs">⌘</span>
+                            <span>K</span>
+                        </div>
                     </div>
 
                     <div className="flex items-center gap-6">
