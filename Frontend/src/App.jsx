@@ -10,13 +10,8 @@ function App() {
     const showNav = location.pathname === '/';
 
     return (
-        <div className="min-h-screen relative overflow-x-hidden">
-            {/* Background Blooms */}
-            <div className="bloom -top-40 -left-40" />
-            <div className="bloom -bottom-40 -right-40" />
-
+        <div className="min-h-screen relative overflow-x-hidden bg-surface-base">
             {showNav && <Navbar />}
-
             <main>
                 <Routes>
                     <Route path="/" element={<LandingPage />} />

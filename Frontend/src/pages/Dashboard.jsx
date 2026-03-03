@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import config from '../utils/config';
 import {
     LayoutDashboard,
     Layers,
@@ -40,7 +41,7 @@ const Dashboard = () => {
 
     const fetchData = async () => {
         try {
-            const response = await axios.get('http://localhost:3030/api/dashboard-data', {
+            const response = await axios.get(`${config.API_URL}/api/dashboard-data`, {
                 withCredentials: true
             });
             if (response.data.success) {
@@ -63,7 +64,7 @@ const Dashboard = () => {
             const fetchAnalytics = async () => {
                 setAnalyticsLoading(true);
                 try {
-                    const response = await axios.get(`http://localhost:3030/api/repo-analytics/${selectedRepo.fullName}`, {
+                    const response = await axios.get(`${config.API_URL}/api/repo-analytics/${selectedRepo.fullName}`, {
                         withCredentials: true
                     });
                     if (response.data.success) {
@@ -112,7 +113,7 @@ const Dashboard = () => {
 
     const handleToggleProject = async (repoFullName) => {
         try {
-            await axios.post('http://localhost:3030/api/toggle-project',
+            await axios.post(`${config.API_URL}/api/toggle-project`,
                 { repoFullName },
                 { withCredentials: true }
             );
@@ -123,7 +124,7 @@ const Dashboard = () => {
     };
 
     const handleLogout = () => {
-        window.location.href = 'http://localhost:3030/api/auth/logout';
+        window.location.href = `${config.API_URL}/api/auth/logout`;
     };
 
     const filteredActiveRepos = data.activeRepos.filter(repo =>

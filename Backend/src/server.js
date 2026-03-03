@@ -8,9 +8,7 @@ const PORT = configs.PORT || 3030;
 const staretServer = () => {
     try {
         const server = app.listen(PORT, () => {
-            console.log("=========================================");
             console.log(` SERVER LIVE: http://localhost:${PORT}`);
-            console.log("=========================================");
 
             // connect to the database here
             connectDB()
