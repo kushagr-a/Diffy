@@ -200,13 +200,6 @@ const HeroSection = () => {
                             </a>
                         </div>
 
-                        {/* Trust strip */}
-                        <div className="flex flex-wrap items-center gap-x-6 gap-y-3 pt-8 border-t border-zinc-800/60">
-                            <span className="text-[10px] text-zinc-600 uppercase tracking-widest">Trusted by devs at</span>
-                            {['Stripe', 'Vercel', 'Linear', 'Planetscale'].map(company => (
-                                <span key={company} className="text-xs font-semibold text-zinc-500 hover:text-zinc-300 transition-colors cursor-default">{company}</span>
-                            ))}
-                        </div>
                     </motion.div>
 
                     {/* ── Right: Mock Card ── */}
