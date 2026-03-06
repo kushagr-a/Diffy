@@ -39,6 +39,29 @@ const Dashboard = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [modalSearchTerm, setModalSearchTerm] = useState(''); // Modal search
 
+    // Extract token from URL on initial load
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const tokenFromUrl = params.get('token');
+        
+        if (tokenFromUrl) {
+            // Store token in localStorage
+            localStorage.setItem('authToken', tokenFromUrl);
+            // Set as default axios header
+            axios.defaults.headers.common['Authorization'] = `Bearer ${tokenFromUrl}`;
+            // Clean up URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+            console.log('>>> Token extracted from URL and set in Authorization header');
+        } else {
+            // Check if token exists in localStorage
+            const storedToken = localStorage.getItem('authToken');
+            if (storedToken) {
+                axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+                console.log('>>> Token loaded from localStorage');
+            }
+        }
+    }, []);
+
     const fetchData = async () => {
         try {
             const response = await axios.get(`${config.API_URL}/api/dashboard-data`, {
@@ -124,6 +147,10 @@ const Dashboard = () => {
     };
 
     const handleLogout = () => {
+        // Clear token from localStorage
+        localStorage.removeItem('authToken');
+        delete axios.defaults.headers.common['Authorization'];
+        // Redirect to backend logout which clears cookie
         window.location.href = `${config.API_URL}/api/auth/logout`;
     };
 

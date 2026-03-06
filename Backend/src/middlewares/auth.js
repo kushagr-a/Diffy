@@ -21,11 +21,20 @@ import { User } from "../github/userModel.js"
 export const authenticateUsers = async (req, res, next) => {
     try {
 
-        // 1) Get token from authorization header or cookies
-        const token = req.cookies?.token || req.headers.authorization?.split(" ")[1]
+        // 1) Get token from cookies, Authorization header, or Bearer token
+        let token = req.cookies?.token;
         
-        console.log(`>>> Auth check - Cookies:`, req.cookies);
-        console.log(`>>> Auth check - Token found:`, !!token);
+        if (!token && req.headers.authorization) {
+            // Extract Bearer token from Authorization header
+            const parts = req.headers.authorization.split(" ");
+            if (parts[0] === "Bearer" && parts[1]) {
+                token = parts[1];
+            }
+        }
+        
+        console.log(`>>> Auth check - Token from cookies:`, !!req.cookies?.token);
+        console.log(`>>> Auth check - Token from Authorization header:`, !!(req.headers.authorization && !req.cookies?.token));
+        console.log(`>>> Auth check - Final token found:`, !!token);
 
         // validation 
         if (!token) {

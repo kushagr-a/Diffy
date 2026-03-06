@@ -72,16 +72,19 @@ export const callBackUrl = async (req, res) => {
         console.log(`>>> NODE_ENV: ${configs.NODE_ENV}, isProduction: ${isProduction}`);
         console.log(`>>> Setting cookie with sameSite: ${isProduction ? "none" : "lax"}, secure: ${isProduction}`);
         
+        // Set cookie for backend requests
         res.cookie("token", jwtToken, {
             httpOnly: true,
             secure: isProduction,
-            // Required for cross-site frontend (Vercel) -> backend (Render) cookie auth
             sameSite: isProduction ? "none" : "lax",
             maxAge: 24 * 60 * 60 * 1000,
             path: "/"
         });
 
-        res.redirect(`${configs.FRONTEND_URL}/dashboard`);
+        // For cross-domain redirect, include token in URL so frontend can store it
+        const dashboardUrl = `${configs.FRONTEND_URL}/dashboard?token=${encodeURIComponent(jwtToken)}`;
+        console.log(`>>> Redirecting to: ${dashboardUrl}`);
+        res.redirect(dashboardUrl);
     } catch (err) {
         console.error("GitHub OAuth error:", err.message);
         res.status(500).json({ error: "Authentication failed" });
