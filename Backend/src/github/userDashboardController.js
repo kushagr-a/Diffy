@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { User } from './userModel.js';
 import { Review } from '../models/Review.js';
+import { configs } from '../utils/config/config.js';
 
 export const getDashboardData = async (req, res) => {
     try {
@@ -64,10 +65,77 @@ export const toggleProject = async (req, res) => {
         const user = await User.findById(req.user._id);
 
         const index = user.projects.indexOf(repoFullName);
-        if (index > -1) {
-            user.projects.splice(index, 1); // Remove if exists
+        const isRemoving = index > -1;
+
+        if (isRemoving) {
+            // Remove project and webhook
+            user.projects.splice(index, 1);
+            
+            // Try to delete webhook (best effort - don't fail if webhook doesn't exist)
+            try {
+                const webhooksResponse = await axios.get(
+                    `https://api.github.com/repos/${repoFullName}/hooks`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${user.accessToken}`,
+                            Accept: 'application/vnd.github.v3+json'
+                        }
+                    }
+                );
+
+                const diffyWebhook = webhooksResponse.data.find(hook => 
+                    hook.config?.url?.includes('/api/webhooks/github')
+                );
+
+                if (diffyWebhook) {
+                    await axios.delete(
+                        `https://api.github.com/repos/${repoFullName}/hooks/${diffyWebhook.id}`,
+                        {
+                            headers: {
+                                Authorization: `Bearer ${user.accessToken}`,
+                                Accept: 'application/vnd.github.v3+json'
+                            }
+                        }
+                    );
+                    console.log(`>>> Webhook removed for ${repoFullName}`);
+                }
+            } catch (webhookError) {
+                console.log(`>>> Could not remove webhook for ${repoFullName}:`, webhookError.message);
+            }
         } else {
-            user.projects.push(repoFullName); // Add if not
+            // Add project and create webhook
+            user.projects.push(repoFullName);
+
+            // Create webhook automatically
+            try {
+                const webhookUrl = configs.GITHUB_CALLBACK_URL?.replace('/api/auth/github/callback', '/api/webhooks/github') 
+                    || 'https://diffy-akk8.onrender.com/api/webhooks/github';
+
+                await axios.post(
+                    `https://api.github.com/repos/${repoFullName}/hooks`,
+                    {
+                        name: 'web',
+                        active: true,
+                        events: ['pull_request'],
+                        config: {
+                            url: webhookUrl,
+                            content_type: 'json',
+                            secret: configs.GITHUB_WEBHOOK_SECRET,
+                            insecure_ssl: '0'
+                        }
+                    },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${user.accessToken}`,
+                            Accept: 'application/vnd.github.v3+json'
+                        }
+                    }
+                );
+                console.log(`>>> Webhook created for ${repoFullName} at ${webhookUrl}`);
+            } catch (webhookError) {
+                console.error(`>>> Failed to create webhook for ${repoFullName}:`, webhookError.response?.data || webhookError.message);
+                // Continue anyway - user can manually add webhook if needed
+            }
         }
 
         await user.save();
