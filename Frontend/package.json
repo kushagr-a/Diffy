@@ -1,0 +1,37 @@
+{
+    "name": "frontend",
+    "private": true,
+    "version": "0.0.0",
+    "type": "module",
+    "scripts": {
+        "postinstall": "node fix-permissions.js",
+        "dev": "vite",
+        "build": "vite build",
+        "lint": "eslint .",
+        "preview": "vite preview"
+    },
+    "dependencies": {
+        "@tailwindcss/postcss": "^4.2.1",
+        "axios": "^1.13.5",
+        "framer-motion": "^12.34.3",
+        "lucide-react": "^0.575.0",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+        "react-markdown": "^10.1.0",
+        "react-router-dom": "^7.13.1",
+        "remark-gfm": "^4.0.1"
+    },
+    "devDependencies": {
+        "@types/react": "^19.0.8",
+        "@types/react-dom": "^19.0.3",
+        "@vitejs/plugin-react-swc": "^3.5.0",
+        "autoprefixer": "^10.4.24",
+        "eslint": "^9.19.0",
+        "eslint-plugin-react": "^7.37.4",
+        "eslint-plugin-react-hooks": "^5.0.0",
+        "eslint-plugin-react-refresh": "^0.4.18",
+        "postcss": "^8.5.6",
+        "tailwindcss": "^4.2.1",
+        "vite": "^6.1.0"
+    }
+}

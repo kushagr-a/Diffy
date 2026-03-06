@@ -2,16 +2,29 @@ import express from "express"
 import morm from "morgan"
 import cookieParser from "cookie-parser"
 import cors from "cors"
+// import multer from "multer"
 
 import apiRoute from "./apiRoutes.js"
+import webHooks from "./hooks/webhookRoutes.js"
 
 const app = express()
 
-// Middleware
+app.use((req, res, next) => {
+    console.log(`>>> [SYSTEM LOG] ${new Date().toISOString()} | ${req.method} ${req.url}`);
+    console.log(`>>> [HEADERS] event: ${req.headers['x-github-event']}`);
+    next();
+});
+
+app.use(morm("dev"))
+
+// Webhook route must be BEFORE express.json() to capture raw body for signature verification
+app.use("/api/webhooks", webHooks)
+
+// Middleware (Global for other routes)
 app.use(express.json({ limit: "10kb" }))
 app.use(express.urlencoded({ extended: true, limit: "10kb" }))
-app.use(morm("dev"))
 app.use(cookieParser())
+
 
 // cors configuration
 app.use(

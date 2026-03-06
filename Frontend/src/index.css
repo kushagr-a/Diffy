@@ -1,0 +1,125 @@
+@import "tailwindcss";
+
+@import url('https://rsms.me/inter/inter.css');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+@theme {
+    --color-brand: #6366f1;
+    --color-brand-muted: #818cf8;
+    --color-brand-dim: rgba(99, 102, 241, 0.15);
+
+    --color-surface-base: #09090b;
+    --color-surface-card: #0c0c0e;
+    --color-surface-muted: #18181b;
+
+    --color-border-subtle: #27272a;
+
+    --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+}
+
+@layer base {
+    body {
+        @apply bg-surface-base text-zinc-100 font-sans antialiased selection:bg-brand/20;
+        font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    }
+}
+
+@layer components {
+    .btn-primary {
+        @apply h-10 px-4 bg-zinc-100 hover:bg-zinc-200 text-zinc-950 rounded font-semibold transition-all shadow-sm active:scale-[0.98] flex items-center justify-center gap-2;
+    }
+
+    .btn-secondary {
+        @apply h-10 px-4 bg-zinc-900 hover:bg-zinc-800 text-zinc-100 border border-border-subtle rounded font-semibold transition-all flex items-center justify-center gap-2;
+    }
+
+    .card-premium {
+        @apply bg-zinc-900/30 border border-zinc-800/50 rounded-lg p-6 hover:border-zinc-700/50 transition-colors;
+    }
+
+    .nav-sidebar-item {
+        @apply flex items-center gap-3 px-3 py-2 rounded text-sm font-medium text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/50 transition-all;
+    }
+
+    .nav-sidebar-item-active {
+        @apply bg-zinc-800 text-zinc-100 border border-zinc-700/50;
+    }
+
+    /* Markdown Styles */
+    .markdown-content {
+        @apply text-zinc-300 leading-relaxed space-y-4;
+    }
+
+    .markdown-content h1,
+    .markdown-content h2,
+    .markdown-content h3 {
+        @apply text-white font-bold mt-8 mb-4 border-b border-zinc-800 pb-2 flex items-center gap-2;
+    }
+
+    .markdown-content p {
+        @apply mb-4;
+    }
+
+    .markdown-content code {
+        @apply px-1.5 py-0.5 bg-zinc-800 text-brand rounded text-[10px] font-mono;
+    }
+
+    .markdown-content pre {
+        @apply p-4 bg-zinc-950 border border-zinc-800 rounded-lg overflow-x-auto my-6;
+    }
+
+    .markdown-content pre code {
+        @apply p-0 bg-transparent text-zinc-300 block;
+    }
+
+    .markdown-content blockquote {
+        @apply pl-4 border-l-4 border-brand italic text-zinc-400 my-6;
+    }
+
+    .markdown-content ul,
+    .markdown-content ol {
+        @apply pl-6 my-4 space-y-2;
+    }
+
+    .markdown-content ul {
+        @apply list-disc;
+    }
+
+    .markdown-content ol {
+        @apply list-decimal;
+    }
+
+    .markdown-content a {
+        @apply text-brand hover:underline;
+    }
+}
+
+/* Linear-style decorative blur */
+.bg-glow {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 500px;
+    background: radial-gradient(circle at 50% -100px, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    @apply bg-zinc-800 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    @apply bg-zinc-700;
+}
