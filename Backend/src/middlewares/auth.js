@@ -23,6 +23,9 @@ export const authenticateUsers = async (req, res, next) => {
 
         // 1) Get token from authorization header or cookies
         const token = req.cookies?.token || req.headers.authorization?.split(" ")[1]
+        
+        console.log(`>>> Auth check - Cookies:`, req.cookies);
+        console.log(`>>> Auth check - Token found:`, !!token);
 
         // validation 
         if (!token) {

@@ -68,10 +68,15 @@ export const callBackUrl = async (req, res) => {
             { expiresIn: "1d" }
         );
 
+        const isProduction = configs.NODE_ENV === "production";
+        console.log(`>>> NODE_ENV: ${configs.NODE_ENV}, isProduction: ${isProduction}`);
+        console.log(`>>> Setting cookie with sameSite: ${isProduction ? "none" : "lax"}, secure: ${isProduction}`);
+        
         res.cookie("token", jwtToken, {
             httpOnly: true,
-            secure: configs.NODE_ENV === "production",
-            sameSite: "lax",
+            secure: isProduction,
+            // Required for cross-site frontend (Vercel) -> backend (Render) cookie auth
+            sameSite: isProduction ? "none" : "lax",
             maxAge: 24 * 60 * 60 * 1000,
             path: "/"
         });
@@ -85,10 +90,12 @@ export const callBackUrl = async (req, res) => {
 
 // Logout UI Action
 export const logout = (req, res) => {
+    const isProduction = configs.NODE_ENV === "production";
     res.clearCookie("token", {
         path: "/",
         httpOnly: true,
-        sameSite: "lax"
+        secure: isProduction,
+        sameSite: isProduction ? "none" : "lax"
     });
     res.redirect(configs.FRONTEND_URL || "http://localhost:5173");
 };
