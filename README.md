@@ -1,13 +1,34 @@
 # Diffy
 
-Diffy helps review GitHub Pull Requests using AI.
+Diffy is an AI-powered GitHub PR reviewer. It connects to a user's GitHub account, tracks selected repositories, and generates review insights for pull requests.
 
-## What It Does
+## What Diffy Does (In Detail)
 
-- Login with GitHub
-- Show your repositories in a dashboard
-- Let you connect repositories
-- Add PR review automation using GitHub webhooks
+1. Authenticates users with GitHub OAuth.
+2. Fetches repositories available to that user via GitHub API.
+3. Lets users choose which repositories to enable in the dashboard.
+4. Creates/removes webhooks when a repo is connected/disconnected.
+5. Listens to PR webhook events (`opened`, `synchronize`, `reopened`).
+6. Fetches PR context and sends it to Gemini for analysis.
+7. Stores generated review data and metadata in MongoDB.
+8. Shows active repos, scans, and report summaries in the dashboard.
+
+## What Diffy Does NOT Do
+
+1. It does not replace GitHub's native code review process or branch protections.
+2. It does not auto-merge PRs or auto-approve code.
+3. It does not guarantee bug-free code; results are AI-generated guidance.
+4. It does not scan repositories unless a user explicitly connects them.
+5. It does not run a full CI/CD pipeline (tests/build/deploy) by itself.
+
+## How It Works (Simple Flow)
+
+1. User clicks **Connect GitHub**.
+2. Backend completes OAuth and redirects user to dashboard.
+3. User connects one or more repositories.
+4. Diffy receives PR webhook events from connected repos.
+5. Backend analyzes PR content with Gemini and stores output.
+6. User sees analysis from dashboard and GitHub comments/reports.
 
 ## Tech Stack
 
@@ -20,31 +41,6 @@ Diffy helps review GitHub Pull Requests using AI.
 
 - `Frontend/` - React app
 - `Backend/` - Express API
-
-## Architecture Diagram
-
-```mermaid
-flowchart TD
-		U[User in Browser] --> FE[Frontend - Vercel]
-
-		subgraph AuthFlow[Login and Access Flow]
-			FE -- Connect GitHub --> BE[Backend API - Render]
-			BE -- OAuth redirect --> GH[GitHub]
-			GH -- Callback code --> BE
-			BE -- JWT + user sync --> DB[(MongoDB)]
-			BE -- Redirect to dashboard --> FE
-		end
-
-		subgraph ReviewFlow[PR Review Automation Flow]
-			GR[GitHub Repository PR Event] -- Webhook --> BE
-			BE -- Fetch PR diff and metadata --> GH
-			BE -- Send code context --> AI[Gemini API]
-			AI -- Analysis result --> BE
-			BE -- Save review --> DB
-			BE -- Post/update PR feedback --> GH
-			FE -- Dashboard analytics --> BE
-		end
-```
 
 ## Local Setup
 
